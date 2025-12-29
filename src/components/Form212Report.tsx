@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ProcessedTransaction } from '@/lib/types';
 import { format } from 'date-fns';
 import { ro } from 'date-fns/locale';
 import { calculateTaxSummary } from '@/utils/csv';
+import { calculateCostBasis, PortfolioCostBasis } from '@/utils/costBasis';
 
 interface Form212ReportProps {
   transactions: ProcessedTransaction[];
@@ -29,11 +30,17 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
 
   const summary = calculateTaxSummary(transactions);
   
-  // Calculate income categories
-  const tradeIncome = transactions
-    .filter(tx => tx.label === 'Trade' && tx.valueRON)
-    .reduce((sum, tx) => sum + (tx.valueRON || 0), 0);
+  // Calculate cost basis using FIFO
+  const costBasis: PortfolioCostBasis = useMemo(() => {
+    return calculateCostBasis(transactions);
+  }, [transactions]);
   
+  // Use REAL gains from cost basis instead of simple income-expense
+  const realizedGains = costBasis.totalRealizedGains;
+  const realizedLosses = costBasis.totalRealizedLosses;
+  const netCapitalGain = costBasis.totalNetGain;
+  
+  // Calculate income categories (for staking/gifts which are taxed at receipt)
   const stakingIncome = transactions
     .filter(tx => tx.label === 'Staking Reward' && tx.valueRON)
     .reduce((sum, tx) => sum + (tx.valueRON || 0), 0);
@@ -42,19 +49,18 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
     .filter(tx => tx.label === 'Gift' && tx.valueRON)
     .reduce((sum, tx) => sum + (tx.valueRON || 0), 0);
 
-  const totalIncome = summary.totalReceived;
-  const totalExpenses = summary.totalSent;
-  const netGain = Math.max(0, totalIncome - totalExpenses);
+  // Total taxable = capital gains + staking income (gifts may be exempt)
+  const totalTaxableIncome = Math.max(0, netCapitalGain) + stakingIncome;
   
   // Tax calculations
-  const isExempt = netGain <= EXEMPT_ANNUAL;
-  const taxableAmount = isExempt ? 0 : netGain;
+  const isExempt = totalTaxableIncome <= EXEMPT_ANNUAL;
+  const taxableAmount = isExempt ? 0 : totalTaxableIncome;
   const incomeTax = taxableAmount * TAX_RATE;
   
   // CASS calculation (if income > 6 minimum wages)
   const cassTreshold = MINIMUM_WAGE_2024 * 6;
-  const owessCASS = totalIncome > cassTreshold;
-  const cassBase = owessCASS ? Math.min(totalIncome, MINIMUM_WAGE_2024 * 24) : 0;
+  const owessCASS = totalTaxableIncome > cassTreshold;
+  const cassBase = owessCASS ? Math.min(totalTaxableIncome, MINIMUM_WAGE_2024 * 24) : 0;
   const cassAmount = cassBase * CASS_RATE;
 
   // Get date range and determine fiscal year
@@ -219,9 +225,14 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
               </thead>
               <tbody>
                 <tr>
-                  <td>Câștiguri din tranzacționare (Trade)</td>
-                  <td className="amount">{tradeIncome.toFixed(2)}</td>
-                  <td>Diferența între prețul de vânzare și achiziție</td>
+                  <td>Câștiguri realizate din tranzacționare</td>
+                  <td className="amount">{realizedGains.toFixed(2)}</td>
+                  <td>Calculat FIFO (Preț vânzare - Preț achiziție)</td>
+                </tr>
+                <tr>
+                  <td>Pierderi realizate din tranzacționare</td>
+                  <td className="amount" style={{color: '#dc2626'}}>-{realizedLosses.toFixed(2)}</td>
+                  <td>Deductibile din câștiguri</td>
                 </tr>
                 <tr>
                   <td>Recompense Staking</td>
@@ -234,22 +245,26 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
                   <td>Valoare estimată la data primirii</td>
                 </tr>
                 <tr className="total-row">
-                  <td><strong>TOTAL VENITURI BRUTE</strong></td>
-                  <td className="amount"><strong>{totalIncome.toFixed(2)}</strong></td>
+                  <td><strong>CÂȘTIG NET DIN CAPITAL</strong></td>
+                  <td className="amount"><strong>{netCapitalGain.toFixed(2)}</strong></td>
                   <td></td>
                 </tr>
               </tbody>
             </table>
           </section>
 
-          {/* Deductible Expenses */}
+          {/* Cost Basis Details */}
           <section className="form-section">
-            <h3>CHELTUIELI DEDUCTIBILE</h3>
+            <h3>COST BASIS (METODA FIFO)</h3>
             <table className="form-table">
               <tbody>
                 <tr>
-                  <td>Plăți efectuate (transferuri, achiziții)</td>
-                  <td className="amount">{totalExpenses.toFixed(2)} RON</td>
+                  <td>Total achiziții (cost basis)</td>
+                  <td className="amount">{summary.totalSent.toFixed(2)} RON</td>
+                </tr>
+                <tr>
+                  <td>Total vânzări (încasări)</td>
+                  <td className="amount">{summary.totalReceived.toFixed(2)} RON</td>
                 </tr>
                 <tr>
                   <td>Comisioane rețea (fees)</td>
@@ -265,8 +280,18 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
             
             <div className="tax-summary">
               <div className="tax-row">
-                <span>Câștig net (Venituri - Cheltuieli):</span>
-                <span className="amount">{netGain.toFixed(2)} RON</span>
+                <span>Câștig net din capital (FIFO):</span>
+                <span className="amount" style={{color: netCapitalGain >= 0 ? '#059669' : '#dc2626'}}>
+                  {netCapitalGain >= 0 ? '+' : ''}{netCapitalGain.toFixed(2)} RON
+                </span>
+              </div>
+              <div className="tax-row">
+                <span>+ Venituri din staking:</span>
+                <span className="amount">{stakingIncome.toFixed(2)} RON</span>
+              </div>
+              <div className="tax-row">
+                <span><strong>Total venit impozabil:</strong></span>
+                <span className="amount"><strong>{totalTaxableIncome.toFixed(2)} RON</strong></span>
               </div>
               
               {isExempt ? (
@@ -295,7 +320,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
             
             <div className="cass-info">
               <p>Prag 6 salarii minime ({fiscalYear}): {cassTreshold.toLocaleString('ro-RO')} RON</p>
-              <p>Venit total din crypto: {totalIncome.toFixed(2)} RON</p>
+              <p>Venit impozabil total: {totalTaxableIncome.toFixed(2)} RON</p>
               
               {owessCASS ? (
                 <div className="tax-row warning">
