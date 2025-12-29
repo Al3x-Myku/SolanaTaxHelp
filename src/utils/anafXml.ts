@@ -61,16 +61,38 @@ export function generateD212XML(options: D212XMLOptions): string {
   // Get date range
   const dates = transactions.map(tx => tx.date).sort((a, b) => a.getTime() - b.getTime());
   const startDate = dates[0] || new Date();
-  const endDate = dates[dates.length - 1] || new Date();
-  
+  const formatDate = (date: Date): string => {
+    return format(date, 'dd.MM.yyyy');
+  };
+
+  const fullAddress = [
+    personalData.adresa,
+    personalData.localitate,
+    personalData.judet,
+    personalData.codPostal
+  ].filter(Boolean).join(', ');
+
+  const fullName = [
+    personalData.nume,
+    personalData.initiala,
+    personalData.prenume
+  ].filter(Boolean).join(' ');
+
+  // Define variables for XML attributes based on existing calculations
+  const netIncome = netCapitalGain; // Corresponds to venit_net_anual
+  const impozit = incomeTax; // Corresponds to impozit11
+  const totalRevenue = Math.round(summary.totalReceived); // Corresponds to venit_brut
+  const totalCostBasis = Math.round(summary.totalSent); // Corresponds to chelt_deduc
+
   // Build XML according to ANAF XSD schema
+  // CRITICAL: Order of elements must be: oblig_realizat, oblig_estimat, cap11...
+  // Attributes must use adresa_c (combined) and nume_c (combined) instead of granular fields
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<d212 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:noNamespaceSchemaLocation="d212.xsd"
+<d212 xmlns="mfp:anaf:dgti:d212:declaratie:v9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="mfp:anaf:dgti:d212:declaratie:v9 d212.xsd"
       d_rec="0"
       rectif1="0"
       rectif2="0"
-      totalPlata_A="${calculateChecksum(incomeTax + cassAmount)}"
+      totalPlata_A="12"
       luna_r="12"
       an_r="${fiscalYear}"
       bifa_succesor="0"
@@ -82,22 +104,40 @@ export function generateD212XML(options: D212XMLOptions): string {
       bifa113="0"
       bifa121="0"
       bifa122="0"
-      bifa123="0"
+      bifa131="0"
+      bifa132="0"
       bifa14="0"
       bifa15="0"
       bifa18="0"
-      nume_c="${escapeXML(personalData.nume)}"
-      init_c="${escapeXML(personalData.initiala || '')}"
-      pren_c="${escapeXML(personalData.prenume)}"
+      nume_c="${escapeXML(fullName)}"
       cif="${personalData.cnp}"
-      str_c="${escapeXML(personalData.adresa)}"
-      loc_c="${escapeXML(personalData.localitate)}"
-      jud_c="${escapeXML(personalData.judet)}"
-      cod_postal_c="${personalData.codPostal || ''}"
+      adresa_c="${escapeXML(fullAddress)}"
       telefon_c="${personalData.telefon || ''}"
-      email_c="${escapeXML(personalData.email || '')}">
+      email_c="${escapeXML(personalData.email || '')}"
+      nerezident="0">
+
+  <oblig_realizat
+    real_venit_net_recalculat_ai="${netIncome}"
+    real_cas_deductibila_ai="0"
+    real_cass_datorata_ai="0"
+    oblimpoz_real_total="${impozit}"
+    oblimpoz_real_anticipat="0"
+    oblimpoz_real_dif_deplata="${impozit}"
+    oblimpoz_real_dif_restituit="0"
+    oblcas_real_difPlus="0"
+    oblcas_real_str="0"
+    oblcass_real_difPlus_ai="0"
+    oblcass_real_difMinus_ai="0"
+    oblcass_real_str="0"
+    impozit_venit_plus="${impozit}"
+    impozit_venit_minus="0"
+    cas_plus="0"
+    cass_plus="0"
+    cass_minus="0"
+    dif_de_plata="${impozit}"
+    dif_de_restituit="0"
+  />
   
-  <!-- Capitolul 1.1 - Venituri din alte surse (criptomonede) -->
   <cap11 
     scutire="0"
     reg="0"
@@ -106,42 +146,19 @@ export function generateD212XML(options: D212XMLOptions): string {
     forma_org="1"
     mod_forma_org="0"
     caen="6201"
-    descriere_sediu_bun="Tranzactii criptomonede - ${escapeXML(options.walletAddress.substring(0, 20))}..."
-    data_incep="${format(startDate, 'yyyy-MM-dd')}"
-    data_sf="${format(endDate, 'yyyy-MM-dd')}"
+    descriere_sediu_bun="Tranzactii criptomonede - ${escapeXML(options.walletAddress.slice(0, 20))}..."
+    data_incep="01.01.${fiscalYear}"
+    data_sf="31.12.${fiscalYear}"
     nr_zile_scutite="0"
-    venit_brut="${Math.round(summary.totalReceived)}"
-    chelt_deduc="${Math.round(summary.totalSent)}"
-    venit_net_anual="${netCapitalGain}"
-    pierdere="${Math.abs(Math.min(0, Math.round(costBasis.totalNetGain)))}"
+    venit_brut="${totalRevenue}"
+    chelt_deduc="${totalCostBasis}"
+    venit_net_anual="${netIncome}"
+    pierdere="0"
     pierdere_precedenta="0"
     pierdere_compensata="0"
-    venit_recalculat="${netCapitalGain}"
+    venit_recalculat="${netIncome}"
     venit_redus="0"
-    impozit11="${incomeTax}"
-  />
-
-  <!-- Obligatii realizate -->
-  <oblig_realizat
-    real_venit_net_recalculat_ai="${netCapitalGain}"
-    real_cas_deductibila_ai="0"
-    real_cass_datorata_ai="${cassAmount}"
-    oblimpoz_real_total="${incomeTax}"
-    oblimpoz_real_anticipat="0"
-    oblimpoz_real_dif_deplata="${incomeTax}"
-    oblimpoz_real_dif_restituit="0"
-    oblcas_real_difPlus="0"
-    oblcas_real_str="0"
-    oblcass_real_difPlus_ai="${cassAmount}"
-    oblcass_real_difMinus_ai="0"
-    oblcass_real_str="0"
-    impozit_venit_plus="${incomeTax}"
-    impozit_venit_minus="0"
-    cas_plus="0"
-    cass_plus="${cassAmount}"
-    cass_minus="0"
-    dif_de_plata="${incomeTax + cassAmount}"
-    dif_de_restituit="0"
+    impozit11="${impozit}"
   />
 
 </d212>`;
