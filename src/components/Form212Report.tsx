@@ -324,7 +324,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
             <div className="tax-summary">
               <div className="tax-row">
                 <span>Câștig net din capital:</span>
-                <span className="amount" style={{color: netCapitalGain >= 0 ? '#059669' : '#dc2626'}}>
+                <span className="amount">
                   {netCapitalGain >= 0 ? '+' : ''}{netCapitalGain.toFixed(2)} RON
                 </span>
               </div>
@@ -338,8 +338,8 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
               </div>
               
               {isExempt ? (
-                <div className="tax-row exempt">
-                  <span>✓ Scutit de impozit (sub {EXEMPT_ANNUAL} RON/an)</span>
+                <div className="tax-row">
+                  <span>Scutit de impozit (sub {EXEMPT_ANNUAL} RON/an)</span>
                   <span className="amount">0.00 RON</span>
                 </div>
               ) : (
@@ -350,7 +350,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
                   </div>
                   <div className="tax-row">
                     <span>Impozit pe venit (10%):</span>
-                    <span className="amount highlight-value">{incomeTax.toFixed(2)} RON</span>
+                    <span className="amount"><strong>{incomeTax.toFixed(2)} RON</strong></span>
                   </div>
                 </>
               )}
@@ -366,13 +366,13 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
               <p>Venit impozabil total: {totalTaxableIncome.toFixed(2)} RON</p>
               
               {owessCASS ? (
-                <div className="tax-row warning">
+                <div className="tax-row">
                   <span>CASS datorat (10%):</span>
-                  <span className="amount">{cassAmount.toFixed(2)} RON</span>
+                  <span className="amount"><strong>{cassAmount.toFixed(2)} RON</strong></span>
                 </div>
               ) : (
-                <div className="tax-row exempt">
-                  <span>✓ Nu se datorează CASS (venit sub prag)</span>
+                <div className="tax-row">
+                  <span>Nu se datorează CASS (venit sub prag)</span>
                   <span className="amount">0.00 RON</span>
                 </div>
               )}
@@ -400,30 +400,24 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
               </tbody>
             </table>
 
-            <div className={`deadline-notice ${isPastDeadline ? 'past-deadline' : ''}`}>
+            <div className="deadline-notice">
               <p>
-                <strong>⏰ Termen limită depunere:</strong> 25 Mai {deadlineYear}
-                {isPastDeadline && <span className="deadline-warning"> (TRECUT!)</span>}
+                <strong>Termen limită depunere:</strong> 25 Mai {deadlineYear}
+                {isPastDeadline && <span> (depășit)</span>}
               </p>
-              <p>
-                {isPastDeadline 
-                  ? `Atenție: Termenul pentru anul ${fiscalYear} a trecut. Depuneți cât mai curând pentru a evita penalități.`
-                  : `Depunere: SPV (anaf.ro) sau fizic la ANAF`
-                }
-              </p>
+              <p>Depunere: SPV (anaf.ro) sau fizic la ANAF</p>
             </div>
           </section>
 
           {/* Disclaimer */}
           <section className="form-section disclaimer">
             <p>
-              <strong>⚠️ ATENȚIE:</strong> Acest document este generat automat și are caracter informativ. 
-              Calculele sunt estimative. <strong>Consultați un contabil autorizat</strong> pentru declarația oficială.
+              <strong>Notă:</strong> Acest document este generat automat și are caracter informativ. 
+              Calculele sunt estimative. Consultați un contabil autorizat pentru declarația oficială.
             </p>
             <p>
-              <strong>Notă importantă:</strong> Potrivit Legii 296/2023 modificată în noiembrie 2024, 
-              câștigurile din criptomonede realizate de persoane fizice sunt <strong>scutite temporar 
-              de impozit până la 31 iulie 2025</strong>.
+              Conform Legii 296/2023 modificată în noiembrie 2024, câștigurile din criptomonede 
+              realizate de persoane fizice sunt scutite temporar de impozit până la 31 iulie 2025.
             </p>
           </section>
 
@@ -666,24 +660,11 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
           border-bottom: none;
         }
 
-        .tax-row.exempt {
-          color: #059669;
-        }
-
-        .tax-row.warning {
-          color: #dc2626;
-        }
-
-        .highlight-value {
-          font-weight: 700;
-          color: #dc2626;
-        }
-
         .cass-info {
-          background: #fef3c7;
+          background: #f8fafc;
           padding: 16px;
           border-radius: 8px;
-          border: 1px solid #fcd34d;
+          border: 1px solid #e2e8f0;
         }
 
         .cass-info p {
@@ -692,31 +673,21 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
         }
 
         .summary-section .summary-table {
-          background: #ecfdf5;
+          background: #f8fafc;
         }
 
         .summary-section .total-row {
-          background: #059669;
+          background: #1a365d;
           color: white;
         }
 
         .deadline-notice {
           margin-top: 16px;
           padding: 12px;
-          background: #ecfdf5;
-          border: 1px solid #86efac;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           border-radius: 6px;
           font-size: 14px;
-        }
-
-        .deadline-notice.past-deadline {
-          background: #fef2f2;
-          border-color: #fecaca;
-        }
-
-        .deadline-warning {
-          color: #dc2626;
-          font-weight: 700;
         }
 
         .deadline-notice p {
@@ -724,11 +695,13 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
         }
 
         .disclaimer {
-          background: #fffbeb;
+          background: #f8fafc;
           padding: 16px;
           border-radius: 8px;
-          border: 1px solid #fde68a;
+          border: 1px solid #e2e8f0;
           font-size: 13px;
+          color: #64748b;
+        }
         }
 
         .disclaimer p {
