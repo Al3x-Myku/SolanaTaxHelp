@@ -1,90 +1,88 @@
 # SolTax RO 🇷🇴
 
-Raportare automată a tranzacțiilor Solana cu evaluări istorice în RON pentru conformitate ANAF.
+Automated Solana transaction reporting with historical RON (Romanian Leu) valuations for ANAF compliance.
 
-## 📋 Despre
+## About
 
-SolTax RO este un instrument gratuit și open-source care ajută utilizatorii Solana din România să genereze rapoarte fiscale. Instrumentul:
+SolTax RO is a free, open-source tool that helps Romanian Solana users generate tax reports. The tool:
 
-- Preia istoricul tranzacțiilor din orice portofel Solana
-- Calculează valoarea în RON la data fiecărei tranzacții
-- Permite etichetarea tranzacțiilor (Trade, Gift, Staking, Payment)
-- Exportă un CSV gata pentru declarația ANAF
+- Fetches transaction history from any Solana wallet
+- Calculates RON value at the date of each transaction
+- Allows labeling transactions (Trade, Gift, Staking, Payment)
+- Exports ANAF-ready CSV files
 
-## 🚀 Rulare Locală
+## Quick Start
 
-### 1. Clonează repository-ul
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/[username]/soltax-ro.git
 cd soltax-ro
 ```
 
-### 2. Instalează dependențele
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configurează cheia API
+### 3. Configure API key
 
-Creează fișierul `.env.local` în rădăcina proiectului:
+Create `.env.local` in the project root:
 
 ```
-NEXT_PUBLIC_HELIUS_API_KEY=cheia_ta_helius
+NEXT_PUBLIC_HELIUS_API_KEY=your_helius_key
 ```
 
-Poți obține o cheie gratuită de la [helius.dev](https://helius.dev).
+Get a free key at [helius.dev](https://helius.dev).
 
-### 4. Pornește serverul
+### 4. Run the server
 
 ```bash
 npm run dev
 ```
 
-Deschide [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
-## 📊 Cum Se Folosește
+## How to Use
 
-1. **Introdu adresa portofelului** - Copiază adresa publică Solana
-2. **Așteaptă încărcarea** - Se preiau tranzacțiile și prețurile istorice
-3. **Etichetează tranzacțiile** - Selectează tipul pentru fiecare (Trade, Gift, etc.)
-4. **Filtrează** - Folosește căutarea sau filtrele pentru a găsi tranzacții specifice
-5. **Exportă CSV** - Descarcă raportul pentru ANAF
+1. **Enter wallet address** - Paste your Solana public address
+2. **Wait for loading** - Transactions and historical prices are fetched
+3. **Label transactions** - Select type for each (Trade, Gift, etc.)
+4. **Filter** - Use search or dropdowns to find specific transactions
+5. **Export CSV** - Download the report for ANAF declaration
 
-## 📁 Format CSV
+## CSV Format
 
-Fișierul exportat conține:
+| Column       | Description                                |
+| ------------ | ------------------------------------------ |
+| Data         | Transaction date and time                  |
+| Tip          | Transaction type (SWAP, TRANSFER, etc.)    |
+| Etichetă     | Your label (Trade, Gift, Staking, Payment) |
+| Suma         | Crypto amount                              |
+| Monedă       | Symbol (SOL, USDC, etc.)                   |
+| Preț RON     | Exchange rate at transaction date          |
+| Valoare RON  | Total value in RON                         |
+| Direcție     | Received/Sent/Swap                         |
+| Taxă (SOL)   | Network fee                                |
+| Semnătură TX | Unique transaction ID                      |
 
-| Coloană      | Descriere                                         |
-| ------------ | ------------------------------------------------- |
-| Data         | Data și ora tranzacției                           |
-| Tip          | Tipul tranzacției (SWAP, TRANSFER, etc.)          |
-| Etichetă     | Clasificarea dvs. (Trade, Gift, Staking, Payment) |
-| Suma         | Cantitatea de criptomonedă                        |
-| Monedă       | Simbolul (SOL, USDC, etc.)                        |
-| Preț RON     | Cursul la data tranzacției                        |
-| Valoare RON  | Valoarea totală în lei                            |
-| Direcție     | Primit/Trimis/Schimb                              |
-| Taxă (SOL)   | Comisionul de rețea                               |
-| Semnătură TX | Identificatorul unic al tranzacției               |
-
-## 🛠️ Stack Tehnic
+## Tech Stack
 
 - **Framework**: Next.js 16 + TypeScript
-- **APIs**: Helius (tranzacții), CoinGecko (prețuri)
+- **APIs**: Helius (transactions), CoinGecko (prices)
 - **Deployment**: Vercel
 
-## 🔐 Securitate
+## Security
 
-- Aplicația nu stochează date private
-- Cheia API rămâne locală în `.env.local`
-- Codul sursă este 100% public și verificabil
+- No private data stored
+- API key stays local in `.env.local`
+- 100% open source and auditable
 
-## 📜 Licență
+## License
 
-MIT License - Utilizare liberă, inclusiv comercială.
+MIT License - Free for personal and commercial use.
 
 ---
 
-**Construit pentru comunitatea Solana din România**
+**Built for the Romanian Solana community**
