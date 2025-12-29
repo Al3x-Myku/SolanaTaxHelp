@@ -13,11 +13,14 @@ interface Form212ReportProps {
   onClose: () => void;
 }
 
-// 2024 tax constants
-const MINIMUM_WAGE_2024 = 3300; // RON
-const TAX_RATE = 0.10; // 10%
-const CASS_RATE = 0.10; // 10%
-const EXEMPT_ANNUAL = 600; // RON
+// Tax constants - ANAF Form 212 2025 (v1.0.3)
+// Reference: structura_D212_2025_v1.0.3_01082025.pdf
+const MINIMUM_WAGE_2024_H1 = 3300; // RON (Jan-Jun 2024)
+const MINIMUM_WAGE_2024_H2 = 3700; // RON (Jul 2024+, per validator J10.0.0)
+const MINIMUM_WAGE_2025 = 3700;    // RON (2025 - using latest known)
+const TAX_RATE = 0.10;             // 10% impozit pe venit
+const CASS_RATE = 0.10;            // 10% CASS
+const EXEMPT_ANNUAL = 600;         // RON - prag scutire anuala
 
 export default function Form212Report({ transactions, walletAddress, onClose }: Form212ReportProps) {
   // Personal data state
@@ -57,12 +60,6 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
   const taxableAmount = isExempt ? 0 : totalTaxableIncome;
   const incomeTax = taxableAmount * TAX_RATE;
   
-  // CASS calculation (if income > 6 minimum wages)
-  const cassTreshold = MINIMUM_WAGE_2024 * 6;
-  const owessCASS = totalTaxableIncome > cassTreshold;
-  const cassBase = owessCASS ? Math.min(totalTaxableIncome, MINIMUM_WAGE_2024 * 24) : 0;
-  const cassAmount = cassBase * CASS_RATE;
-
   // Get date range and determine fiscal year
   const dates = transactions.map(tx => tx.date).sort((a, b) => a.getTime() - b.getTime());
   const startDate = dates[0] || new Date();
@@ -70,6 +67,16 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
   
   // Determine fiscal year based on transaction dates
   const fiscalYear = endDate.getFullYear();
+  
+  // Select minimum wage based on fiscal year
+  const minimumWage = fiscalYear >= 2025 ? MINIMUM_WAGE_2025 : 
+                      fiscalYear === 2024 ? MINIMUM_WAGE_2024_H2 : MINIMUM_WAGE_2024_H1;
+  
+  // CASS calculation (if income > 6 minimum wages)
+  const cassTreshold = minimumWage * 6;
+  const owessCASS = totalTaxableIncome > cassTreshold;
+  const cassBase = owessCASS ? Math.min(totalTaxableIncome, minimumWage * 24) : 0;
+  const cassAmount = cassBase * CASS_RATE;
   const deadlineYear = fiscalYear + 1;
   const deadline = new Date(deadlineYear, 4, 25); // May 25 next year
   const now = new Date();
