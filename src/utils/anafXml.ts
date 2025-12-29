@@ -179,14 +179,21 @@ export function downloadD212XML(content: string, walletAddress: string, fiscalYe
   const shortAddr = `${walletAddress.slice(0, 4)}_${walletAddress.slice(-4)}`;
   const filename = `D212_${fiscalYear}_${shortAddr}.xml`;
   
+  // Create link
   const link = document.createElement('a');
+  link.style.display = 'none';
   link.href = url;
   link.download = filename;
-  link.style.display = 'none';
   
+  // Append to body (required for Firefox)
   document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
   
-  URL.revokeObjectURL(url);
+  // Programmatic click
+  link.click();
+  
+  // Clean up after a small delay to ensure download starts
+  setTimeout(() => {
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }, 100);
 }
