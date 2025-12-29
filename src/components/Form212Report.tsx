@@ -535,13 +535,27 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
           color: #334155;
         }
 
+        .form-table td {
+          color: #1a1a2e;
+        }
+
+        .form-table tr:hover td {
+          background: #f1f5f9;
+          color: #1a1a2e;
+        }
+
         .form-table .amount {
           text-align: right;
           font-family: monospace;
+          color: #1a1a2e;
         }
 
         .total-row {
           background: #f1f5f9;
+        }
+
+        .total-row td {
+          color: #1a1a2e !important;
         }
 
         .tax-summary {
