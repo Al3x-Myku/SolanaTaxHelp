@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo } from 'react';
 import WalletInput from '@/components/WalletInput';
 import TransactionTable from '@/components/TransactionTable';
 import ExportButton from '@/components/ExportButton';
+import Form212Report from '@/components/Form212Report';
 import { 
   ProcessedTransaction, 
   TransactionLabel, 
@@ -20,6 +21,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string>('');
+  const [showForm212, setShowForm212] = useState(false);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
@@ -154,7 +156,6 @@ export default function Home() {
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
     return transactions.filter(tx => {
-      // Search filter
       if (searchTerm) {
         const search = searchTerm.toLowerCase();
         const matchesSearch = 
@@ -164,14 +165,12 @@ export default function Home() {
         if (!matchesSearch) return false;
       }
       
-      // Type filter
       if (typeFilter !== 'all') {
         if (!tx.type.toLowerCase().includes(typeFilter.toLowerCase())) {
           return false;
         }
       }
       
-      // Label filter
       if (labelFilter !== 'all') {
         if (tx.label !== labelFilter) return false;
       }
@@ -219,7 +218,7 @@ export default function Home() {
           <div className="container">
             <h1 className="hero-title">Raportare tranzacții Solana</h1>
             <p className="hero-subtitle">
-              Generează rapoarte cu prețuri istorice RON pentru declarații ANAF
+              Generează Formular 212 (Declarația Unică) pentru ANAF
             </p>
             
             <div className="search-section">
@@ -281,10 +280,24 @@ export default function Home() {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              <ExportButton 
-                transactions={filteredTransactions} 
-                walletAddress={walletAddress}
-              />
+              <div className="export-buttons">
+                <button 
+                  onClick={() => setShowForm212(true)}
+                  className="btn btn-form212"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  Generează Form 212
+                </button>
+                <ExportButton 
+                  transactions={filteredTransactions} 
+                  walletAddress={walletAddress}
+                />
+              </div>
             </div>
 
             {/* Table */}
@@ -303,6 +316,54 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Form 212 Modal */}
+      {showForm212 && (
+        <Form212Report
+          transactions={filteredTransactions}
+          walletAddress={walletAddress}
+          onClose={() => setShowForm212(false)}
+        />
+      )}
+
+      <style jsx>{`
+        .export-buttons {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .btn-form212 {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 20px;
+          font-size: 14px;
+          font-weight: 500;
+          background: #1a365d;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+
+        .btn-form212:hover {
+          background: #2c5282;
+        }
+
+        @media (max-width: 640px) {
+          .export-buttons {
+            flex-direction: column;
+            width: 100%;
+          }
+
+          .btn-form212 {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      `}</style>
     </>
   );
 }
