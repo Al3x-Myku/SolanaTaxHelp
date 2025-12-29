@@ -227,7 +227,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
                 <tr>
                   <td>Câștiguri realizate din tranzacționare</td>
                   <td className="amount">{realizedGains.toFixed(2)}</td>
-                  <td>Calculat FIFO (Preț vânzare - Preț achiziție)</td>
+                  <td>Diferență (preț vânzare - preț achiziție)</td>
                 </tr>
                 <tr>
                   <td>Pierderi realizate din tranzacționare</td>
@@ -255,7 +255,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
 
           {/* Cost Basis Details */}
           <section className="form-section">
-            <h3>COST BASIS (METODA FIFO)</h3>
+            <h3>DETALII CALCUL CÂȘTIG</h3>
             <table className="form-table">
               <tbody>
                 <tr>
@@ -280,7 +280,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
             
             <div className="tax-summary">
               <div className="tax-row">
-                <span>Câștig net din capital (FIFO):</span>
+                <span>Câștig net din capital:</span>
                 <span className="amount" style={{color: netCapitalGain >= 0 ? '#059669' : '#dc2626'}}>
                   {netCapitalGain >= 0 ? '+' : ''}{netCapitalGain.toFixed(2)} RON
                 </span>
