@@ -1,74 +1,90 @@
 # SolTax RO 🇷🇴
 
-**Raportare automată a tranzacțiilor Solana cu evaluări istorice în RON pentru conformitate ANAF.**
+Raportare automată a tranzacțiilor Solana cu evaluări istorice în RON pentru conformitate ANAF.
 
-Automated Solana transaction reporting with historical RON (Romanian Leu) valuations for ANAF compliance.
+## 📋 Despre
 
-## 🎯 Despre Proiect
+SolTax RO este un instrument gratuit și open-source care ajută utilizatorii Solana din România să genereze rapoarte fiscale. Instrumentul:
 
-SolTax RO este un instrument utilitar specializat pentru comunitatea Solana din România. Instrumentul permite oricărui utilizator să introducă adresa publică a portofelului și să genereze instant un raport CSV formatat, mapând fiecare tranzacție la prețul istoric al SOL/USDC/ETH în RON.
+- Preia istoricul tranzacțiilor din orice portofel Solana
+- Calculează valoarea în RON la data fiecărei tranzacții
+- Permite etichetarea tranzacțiilor (Trade, Gift, Staking, Payment)
+- Exportă un CSV gata pentru declarația ANAF
 
-## 🚀 Ghid de Utilizare
+## 🚀 Rulare Locală
 
-### 1. Instalare
+### 1. Clonează repository-ul
 
 ```bash
-# Clonează repository-ul
 git clone https://github.com/[username]/soltax-ro.git
 cd soltax-ro
-
-# Instalează dependențele
-npm install
-
-# Configurează variabilele de mediu
-cp .env.example .env.local
-# Editează .env.local cu cheile tale API
 ```
 
-### 2. Configurare API Keys
+### 2. Instalează dependențele
 
-Ai nevoie de:
+```bash
+npm install
+```
 
-- **Helius API Key** (gratuit): [helius.dev](https://helius.dev)
-- **CoinGecko API Key** (opțional, gratuit): [coingecko.com](https://www.coingecko.com/en/api)
+### 3. Configurează cheia API
 
-### 3. Rulare
+Creează fișierul `.env.local` în rădăcina proiectului:
+
+```
+NEXT_PUBLIC_HELIUS_API_KEY=cheia_ta_helius
+```
+
+Poți obține o cheie gratuită de la [helius.dev](https://helius.dev).
+
+### 4. Pornește serverul
 
 ```bash
 npm run dev
 ```
 
-Deschide [http://localhost:3000](http://localhost:3000) în browser.
+Deschide [http://localhost:3000](http://localhost:3000).
 
-### 4. Generare Raport
+## 📊 Cum Se Folosește
 
-1. Introdu adresa portofelului Solana
-2. Așteaptă încărcarea tranzacțiilor
-3. Etichetează tranzacțiile (Trade, Gift, Staking Reward, Payment)
-4. Descarcă CSV-ul pentru ANAF
+1. **Introdu adresa portofelului** - Copiază adresa publică Solana
+2. **Așteaptă încărcarea** - Se preiau tranzacțiile și prețurile istorice
+3. **Etichetează tranzacțiile** - Selectează tipul pentru fiecare (Trade, Gift, etc.)
+4. **Filtrează** - Folosește căutarea sau filtrele pentru a găsi tranzacții specifice
+5. **Exportă CSV** - Descarcă raportul pentru ANAF
 
-## 📊 Format CSV Export
+## 📁 Format CSV
 
-| Coloană     | Descriere                  |
-| ----------- | -------------------------- |
-| Data        | Data tranzacției           |
-| Tip         | Tipul tranzacției          |
-| Suma        | Cantitatea de token        |
-| Monedă      | SOL/USDC/etc               |
-| Preț RON    | Prețul la data tranzacției |
-| Valoare RON | Valoarea totală în RON     |
-| Semnătură   | Transaction signature      |
+Fișierul exportat conține:
 
-## 🛠️ Tech Stack
+| Coloană      | Descriere                                         |
+| ------------ | ------------------------------------------------- |
+| Data         | Data și ora tranzacției                           |
+| Tip          | Tipul tranzacției (SWAP, TRANSFER, etc.)          |
+| Etichetă     | Clasificarea dvs. (Trade, Gift, Staking, Payment) |
+| Suma         | Cantitatea de criptomonedă                        |
+| Monedă       | Simbolul (SOL, USDC, etc.)                        |
+| Preț RON     | Cursul la data tranzacției                        |
+| Valoare RON  | Valoarea totală în lei                            |
+| Direcție     | Primit/Trimis/Schimb                              |
+| Taxă (SOL)   | Comisionul de rețea                               |
+| Semnătură TX | Identificatorul unic al tranzacției               |
 
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **APIs**: Helius RPC, CoinGecko
+## 🛠️ Stack Tehnic
+
+- **Framework**: Next.js 16 + TypeScript
+- **APIs**: Helius (tranzacții), CoinGecko (prețuri)
 - **Deployment**: Vercel
+
+## 🔐 Securitate
+
+- Aplicația nu stochează date private
+- Cheia API rămâne locală în `.env.local`
+- Codul sursă este 100% public și verificabil
 
 ## 📜 Licență
 
-Acest proiect este 100% Open Source sub licența MIT.
+MIT License - Utilizare liberă, inclusiv comercială.
 
 ---
 
-**Construit cu ❤️ pentru comunitatea Solana din România**
+**Construit pentru comunitatea Solana din România**

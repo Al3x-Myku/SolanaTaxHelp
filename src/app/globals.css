@@ -470,31 +470,153 @@ tr:hover td {
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  html, body {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+  
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .nav-links {
+    gap: 16px;
+  }
+  
+  .nav-links a {
+    font-size: 13px;
+  }
+  
+  .hero {
+    padding: 40px 0 24px;
+  }
+  
   .hero-title {
     font-size: 24px;
+    line-height: 1.2;
+  }
+  
+  .hero-subtitle {
+    font-size: 14px;
   }
   
   .search-box {
     flex-direction: column;
   }
   
+  .search-input {
+    font-size: 14px;
+    padding: 14px 16px;
+  }
+  
+  .btn {
+    padding: 14px 20px;
+    width: 100%;
+    justify-content: center;
+  }
+  
   .stats-bar {
     flex-wrap: wrap;
     gap: 16px;
+    padding: 12px 0;
+  }
+  
+  .stat {
+    flex: 1;
+    min-width: 100px;
+  }
+  
+  .stat-value {
+    font-size: 18px;
   }
   
   .filters {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
+  }
+  
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
   }
   
   .results-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .table-wrap {
+    margin: 0 -16px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  table {
+    font-size: 12px;
+    min-width: 600px;
   }
   
   th, td {
     padding: 10px 12px;
+    white-space: nowrap;
+  }
+  
+  .label-select {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  
+  .footer {
+    padding: 24px 0;
+    margin-top: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 16px;
+  }
+  
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .hero-title {
+    font-size: 20px;
+  }
+  
+  .stats-bar {
+    gap: 12px;
+  }
+  
+  .stat-label {
+    font-size: 10px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
+  }
+}
+
+/* Touch-friendly */
+@media (hover: none) {
+  .btn:active {
+    opacity: 0.8;
+  }
+  
+  tr:hover td {
+    background: transparent;
   }
 }
