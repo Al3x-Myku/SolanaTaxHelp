@@ -86,6 +86,29 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
     window.print();
   };
 
+  const handleExportXML = () => {
+    import('@/utils/anafXml').then(({ generateD212XML, downloadD212XML }) => {
+      const xml = generateD212XML({
+        transactions,
+        personalData: {
+          nume,
+          prenume,
+          initiala: prenume.charAt(0) || '',
+          cnp,
+          adresa,
+          localitate,
+          judet,
+          codPostal: '',
+          telefon: '',
+          email: '',
+        },
+        walletAddress,
+        fiscalYear,
+      });
+      downloadD212XML(xml, walletAddress, fiscalYear);
+    });
+  };
+
   return (
     <div className="form212-overlay">
       <div className="form212-modal">
@@ -101,6 +124,19 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
               </svg>
               Printează
             </button>
+            <button 
+              onClick={handleExportXML} 
+              className="btn btn-xml"
+              disabled={!nume || !prenume || !cnp}
+              title={!nume || !prenume || !cnp ? 'Completează datele personale obligatorii' : 'Descarcă XML pentru DUKIntegrator'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export XML (ANAF)
+            </button>
             <button onClick={onClose} className="btn btn-secondary">Închide</button>
           </div>
         </div>
@@ -109,7 +145,7 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
           {/* Personal Data Section */}
           <section className="form-section no-print">
             <h3>COMPLETEAZĂ DATELE PERSONALE</h3>
-            <p className="section-note">Aceste date vor apărea pe declarație</p>
+            <p className="section-note">Aceste date vor apărea pe declarație și în fișierul XML</p>
             
             <div className="personal-data-grid">
               <div className="input-group">
@@ -451,6 +487,29 @@ export default function Form212Report({ transactions, walletAddress, onClose }: 
           display: flex;
           gap: 12px;
           margin-top: 16px;
+          flex-wrap: wrap;
+        }
+
+        .btn-xml {
+          background: #059669;
+          color: white;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 16px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .btn-xml:hover:not(:disabled) {
+          background: #047857;
+        }
+
+        .btn-xml:disabled {
+          background: #9ca3af;
+          cursor: not-allowed;
         }
 
         .form212-content {
