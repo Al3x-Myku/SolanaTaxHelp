@@ -2,7 +2,6 @@
 
 import { ProcessedTransaction, TransactionLabel } from '@/lib/types';
 import { format } from 'date-fns';
-import { ro } from 'date-fns/locale';
 import { getExplorerUrl, shortenAddress } from '@/lib/helius';
 
 interface TransactionTableProps {
@@ -12,52 +11,28 @@ interface TransactionTableProps {
 
 const LABELS: TransactionLabel[] = ['Trade', 'Gift', 'Staking Reward', 'Payment', 'Other'];
 
-const LABEL_COLORS: Record<TransactionLabel, string> = {
-  'Trade': 'badge-trade',
-  'Gift': 'badge-transfer',
-  'Staking Reward': 'badge-staking',
-  'Payment': 'badge-payment',
-  'Other': '',
-};
-
 export default function TransactionTable({ transactions, onLabelChange }: TransactionTableProps) {
   if (transactions.length === 0) {
     return (
-      <div className="empty-state">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <div className="empty">
+        <svg className="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
           <rect width="6" height="4" x="9" y="3" rx="1"/>
-          <path d="M9 14h.01"/>
-          <path d="M13 14h.01"/>
-          <path d="M9 17h.01"/>
-          <path d="M13 17h.01"/>
         </svg>
-        <p>Nu există tranzacții de afișat</p>
-
-        <style jsx>{`
-          .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: var(--spacing-3xl);
-            color: var(--color-text-muted);
-            gap: var(--spacing-md);
-          }
-        `}</style>
+        <p>Nu s-au găsit tranzacții</p>
       </div>
     );
   }
 
   return (
-    <div className="table-container">
-      <table className="table">
+    <div className="table-wrap">
+      <table>
         <thead>
           <tr>
             <th>Data</th>
             <th>Tip</th>
             <th>Etichetă</th>
-            <th>Suma</th>
+            <th>Sumă</th>
             <th>Preț RON</th>
             <th>Valoare RON</th>
             <th>TX</th>
@@ -66,47 +41,47 @@ export default function TransactionTable({ transactions, onLabelChange }: Transa
         <tbody>
           {transactions.map((tx) => (
             <tr key={tx.signature}>
-              <td className="text-mono">
-                {format(tx.date, 'dd MMM yyyy', { locale: ro })}
+              <td>
+                {format(tx.date, 'dd.MM.yyyy')}
                 <br />
-                <small className="text-muted">{format(tx.date, 'HH:mm')}</small>
+                <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
+                  {format(tx.date, 'HH:mm')}
+                </span>
               </td>
               <td>
-                <span className={`badge ${getBadgeClass(tx.type)}`}>
-                  {tx.type}
+                <span className={`tag ${getTagClass(tx.type)}`}>
+                  {tx.type.length > 12 ? tx.type.slice(0, 12) + '…' : tx.type}
                 </span>
               </td>
               <td>
                 <select
                   value={tx.label}
                   onChange={(e) => onLabelChange(tx.signature, e.target.value as TransactionLabel)}
-                  className="select"
+                  className="label-select"
                 >
                   {LABELS.map((label) => (
                     <option key={label} value={label}>{label}</option>
                   ))}
                 </select>
               </td>
-              <td className="text-mono">
-                <span className={tx.direction === 'in' ? 'text-success' : ''}>
-                  {tx.direction === 'in' ? '+' : tx.direction === 'out' ? '-' : '↔'}
-                  {tx.amount.toFixed(4)}
+              <td>
+                <span className={`amount ${tx.direction === 'in' ? 'positive' : tx.direction === 'out' ? 'negative' : ''}`}>
+                  {tx.direction === 'in' ? '+' : tx.direction === 'out' ? '-' : ''}
+                  {tx.amount.toFixed(4)} {tx.currency}
                 </span>
-                <br />
-                <small className="text-muted">{tx.currency}</small>
               </td>
-              <td className="text-mono">
+              <td className="price">
                 {tx.priceRON !== null ? (
-                  `${tx.priceRON.toFixed(2)} RON`
+                  `${tx.priceRON.toFixed(2)}`
                 ) : (
-                  <span className="text-muted">N/A</span>
+                  <span className="price-na">—</span>
                 )}
               </td>
-              <td className="text-mono">
+              <td className="price">
                 {tx.valueRON !== null ? (
-                  <strong>{tx.valueRON.toFixed(2)} RON</strong>
+                  <strong>{tx.valueRON.toFixed(2)}</strong>
                 ) : (
-                  <span className="text-muted">N/A</span>
+                  <span className="price-na">—</span>
                 )}
               </td>
               <td>
@@ -118,7 +93,7 @@ export default function TransactionTable({ transactions, onLabelChange }: Transa
                   title={tx.signature}
                 >
                   {shortenAddress(tx.signature, 4)}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                     <polyline points="15 3 21 3 21 9"/>
                     <line x1="10" y1="14" x2="21" y2="3"/>
@@ -129,32 +104,14 @@ export default function TransactionTable({ transactions, onLabelChange }: Transa
           ))}
         </tbody>
       </table>
-
-      <style jsx>{`
-        .tx-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          font-family: var(--font-mono);
-          font-size: 0.8rem;
-        }
-
-        .tx-link:hover {
-          color: var(--color-accent-primary);
-        }
-
-        small {
-          font-size: 0.75rem;
-        }
-      `}</style>
     </div>
   );
 }
 
-function getBadgeClass(type: string): string {
-  const lowerType = type.toLowerCase();
-  if (lowerType.includes('swap') || lowerType.includes('trade')) return 'badge-trade';
-  if (lowerType.includes('transfer')) return 'badge-transfer';
-  if (lowerType.includes('stake') || lowerType.includes('reward')) return 'badge-staking';
-  return 'badge-payment';
+function getTagClass(type: string): string {
+  const t = type.toLowerCase();
+  if (t.includes('swap')) return 'tag-swap';
+  if (t.includes('transfer')) return 'tag-transfer';
+  if (t.includes('stake')) return 'tag-stake';
+  return 'tag-unknown';
 }
