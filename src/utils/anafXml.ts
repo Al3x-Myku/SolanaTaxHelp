@@ -176,7 +176,7 @@ export function downloadD212XML(content: string, walletAddress: string, fiscalYe
   const blob = new Blob([content], { type: 'application/xml;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   
-  const shortAddr = `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+  const shortAddr = `${walletAddress.slice(0, 4)}_${walletAddress.slice(-4)}`;
   const filename = `D212_${fiscalYear}_${shortAddr}.xml`;
   
   const link = document.createElement('a');
